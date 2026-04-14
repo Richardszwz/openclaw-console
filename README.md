@@ -2,13 +2,39 @@
 
 A modern web-based management console for OpenClaw, built with React 18, TypeScript, and Express.js.
 
+## Features
+
+✅ **Completed Features**
+- Dashboard overview
+- Agent management (list + detail view)
+- Model management
+- Session management (list + detail view)
+- Task management (list + editor)
+- Workflow management (view + properties editor)
+- Logs viewer
+- Complete REST API backend
+
+🚧 **In Progress**
+- Real-time log streaming
+- Advanced workflow editor
+- Skill marketplace integration
+
 ## Quick Start (Windows)
 
 ```powershell
 # Clone and run the installation script
-git clone <repository-url> openclaw-console
+git clone https://github.com/Richardszwz/openclaw-console.git
 cd openclaw-console
 .\scripts\install.ps1
+```
+
+**One-click start/restart:**
+```powershell
+# Start the server (production mode)
+.\start-server.ps1
+
+# Restart the server (kills process on port 3000 then restarts)
+.\restart-server.ps1
 ```
 
 ## Manual Installation
@@ -33,6 +59,7 @@ cd openclaw-console
 4. Start the server:
    ```bash
    npm start
+   # Or use one-click PowerShell scripts: .\start-server.ps1
    ```
 
 ## Development
@@ -51,10 +78,14 @@ npm run dev:frontend
 openclaw-console/
 ├── src/
 │   ├── frontend/          # React frontend application
+│   │   └── src/pages/     # Dashboard, Agents, Models, Logs, Sessions, Tasks, Workflow
 │   └── server/            # Express backend API
+│       └── *.ts           # agents, models, logs, sessions, tasks, workflows APIs
 ├── scripts/               # Installation and utility scripts
 ├── data/                  # SQLite database (gitignored)
 ├── dist/                  # Compiled output (gitignored)
+├── start-server.ps1       # One-click production startup (Windows)
+├── restart-server.ps1     # One-click server restart (Windows)
 └── ...config files
 ```
 
