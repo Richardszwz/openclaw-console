@@ -49,6 +49,44 @@ interface HistoryPoint {
 }
 
 /**
+ * Agent statistics interface
+ */
+interface AgentStats {
+  total: number;
+  active: number;
+  idle: number;
+}
+
+/**
+ * Skill information interface
+ */
+interface SkillInfo {
+  id: string;
+  name: string;
+  enabled: boolean;
+  description?: string;
+}
+
+/**
+ * Skills response interface
+ */
+interface SkillsResponse {
+  skills: SkillInfo[];
+  total: number;
+  enabledCount: number;
+}
+
+/**
+ * Log entry interface
+ */
+interface LogEntry {
+  timestamp: number;
+  datetime: string;
+  level: 'debug' | 'info' | 'warn' | 'error' | 'trace';
+  message: string;
+}
+
+/**
  * Gateway Status Dashboard Component
  */
 const Dashboard: React.FC = () => {
@@ -56,13 +94,27 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   const [error, setError] = useState<string | null>(null);
+  
+  // Additional dashboard data
+  const [agentStats, setAgentStats] = useState<AgentStats>({ total: 0, active: 0, idle: 0 });
+  const [skills, setSkills] = useState<SkillInfo[]>([]);
+  const [skillsStats, setSkillsStats] = useState({ total: 0, enabledCount: 0 });
+  const [recentLogs, setRecentLogs] = useState<LogEntry[]>([]);
+  const [systemInfo, setSystemInfo] = useState({ platform: '', nodeVersion: '', uptime: 0 });
 
   /**
    * Fetch gateway status from API
    */
   const fetchStatus = async () => {
     try {
-      const response = await fetch('/api/gateway/status');
+      const apiToken = import.meta.env.VITE_API_TOKEN;
+      const headers: HeadersInit = {};
+      
+      if (apiToken) {
+        headers['Authorization'] = `Bearer ${apiToken}`;
+      }
+      
+      const response = await fetch('/api/gateway/status', { headers });
       const data = await response.json();
       setStatus(data);
       setError(null);
@@ -90,12 +142,73 @@ const Dashboard: React.FC = () => {
   };
 
   /**
+   * Fetch all dashboard data
+   */
+  const fetchDashboardData = async () => {
+    const apiToken = import.meta.env.VITE_API_TOKEN;
+    const headers: HeadersInit = {};
+    
+    if (apiToken) {
+      headers['Authorization'] = `Bearer ${apiToken}`;
+    }
+
+    try {
+      // Fetch agent stats
+      const agentsRes = await fetch('/api/agents', { headers });
+      if (agentsRes.ok) {
+        const agentsData = await agentsRes.json();
+        const agents = agentsData.agents || [];
+        setAgentStats({
+          total: agents.length,
+          active: agents.filter((a: any) => a.status === 'active').length,
+          idle: agents.filter((a: any) => a.status === 'idle').length,
+        });
+      }
+
+      // Fetch skills
+      const skillsRes = await fetch('/api/skills', { headers });
+      if (skillsRes.ok) {
+        const skillsData: SkillsResponse = await skillsRes.json();
+        setSkills(skillsData.skills.slice(0, 10)); // Show top 10
+        setSkillsStats({
+          total: skillsData.total,
+          enabledCount: skillsData.enabledCount,
+        });
+      }
+
+      // Fetch recent logs
+      const logsRes = await fetch('/api/logs/tail?lines=5', { headers });
+      if (logsRes.ok) {
+        const logsData = await logsRes.json();
+        setRecentLogs(logsData.entries || []);
+      }
+
+      // Get system info
+      const sysRes = await fetch('/api/status', { headers });
+      if (sysRes.ok) {
+        // We can get basic system info from process
+        setSystemInfo({
+          platform: navigator.platform,
+          nodeVersion: process?.versions?.node || 'Unknown',
+          uptime: process?.uptime ? Math.round(process.uptime()) : 0,
+        });
+      }
+    } catch (err) {
+      console.error('Failed to fetch dashboard data:', err);
+    }
+  };
+
+  /**
    * Initial fetch and auto-refresh
    */
   useEffect(() => {
     fetchStatus();
+    fetchDashboardData();
     // Refresh every 5 seconds
-    const interval = setInterval(fetchStatus, 5000);
+    const interval = setInterval(() => {
+      fetchStatus();
+      fetchDashboardData();
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -326,6 +439,108 @@ const Dashboard: React.FC = () => {
           ))}
           {(!status?.channels || status.channels.length === 0) && (
             <div className="no-channels">暂无渠道信息</div>
+          )}
+        </div>
+      </div>
+
+      {/* Statistics Overview */}
+      <div className="card stats-section">
+        <h2>系统统计</h2>
+        <div className="stats-grid">
+          <div className="stat-card">
+            <div className="stat-number">{agentStats.total}</div>
+            <div className="stat-label">Total Agents</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-number">{agentStats.active}</div>
+            <div className="stat-label">Active Agents</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-number">{skillsStats.enabledCount}</div>
+            <div className="stat-label">Enabled Skills</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-number">{skillsStats.total}</div>
+            <div className="stat-label">Installed Skills</div>
+          </div>
+        </div>
+      </div>
+
+      {/* System Information */}
+      <div className="card system-section">
+        <h2>系统信息</h2>
+        <div className="system-info-grid">
+          <div className="system-info-item">
+            <label>Gateway Status</label>
+            <span className="value" style={{ color: getStatusColor(status?.status || 'offline') }}>
+              {getStatusLabel(status?.status || 'offline')}
+            </span>
+          </div>
+          <div className="system-info-item">
+            <label>Gateway Version</label>
+            <span className="value">{status?.version || 'Unknown'}</span>
+          </div>
+          <div className="system-info-item">
+            <label>Platform</label>
+            <span className="value">{systemInfo.platform || 'Unknown'}</span>
+          </div>
+          <div className="system-info-item">
+            <label>Node Version</label>
+            <span className="value">{systemInfo.nodeVersion || 'Unknown'}</span>
+          </div>
+          {status?.memory && (
+            <div className="system-info-item">
+              <label>Memory Usage</label>
+              <span className="value">{status.memory.used} MB / {status.memory.percent}%</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Top Skills */}
+      <div className="card skills-section">
+        <h2>已安装技能 (Top 10)</h2>
+        <div className="skills-list">
+          {skills.length === 0 ? (
+            <div className="no-skills">暂无技能信息</div>
+          ) : (
+            skills.map(skill => (
+              <div key={skill.id} className="skill-item">
+                <div className="skill-info">
+                  <span className="skill-name">{skill.name}</span>
+                  {skill.description && (
+                    <span className="skill-description">{skill.description}</span>
+                  )}
+                </div>
+                <span 
+                  className="status-badge small"
+                  style={{ 
+                    backgroundColor: skill.enabled ? getStatusColor('connected') : getStatusColor('disconnected'),
+                    fontSize: '12px'
+                  }}
+                >
+                  {skill.enabled ? 'Enabled' : 'Disabled'}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Recent Logs */}
+      <div className="card logs-section">
+        <h2>最近日志</h2>
+        <div className="logs-list">
+          {recentLogs.length === 0 ? (
+            <div className="no-logs">暂无日志</div>
+          ) : (
+            recentLogs.map((log, index) => (
+              <div key={index} className={`log-item level-${log.level}`}>
+                <span className="log-time">{log.datetime}</span>
+                <span className={`log-level badge-${log.level}`}>{log.level}</span>
+                <span className="log-message">{log.message}</span>
+              </div>
+            ))
           )}
         </div>
       </div>

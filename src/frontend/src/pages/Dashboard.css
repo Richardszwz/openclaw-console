@@ -3,9 +3,42 @@
  */
 
 .dashboard {
-  padding: 20px;
   max-width: 1400px;
   margin: 0 auto;
+  width: 100%;
+}
+
+/* Large screen optimizations */
+@media (min-width: 1921px) and (max-width: 2560px) {
+  .dashboard {
+    max-width: 1800px;
+  }
+  
+  .dashboard-title {
+    font-size: 32px;
+  }
+  
+  .card {
+    padding: 28px;
+  }
+}
+
+@media (min-width: 2561px) {
+  .dashboard {
+    max-width: 2200px;
+  }
+  
+  .dashboard-title {
+    font-size: 36px;
+  }
+  
+  .card {
+    padding: 32px;
+  }
+  
+  .charts-grid .card h3 {
+    font-size: 18px;
+  }
 }
 
 .dashboard-title {
@@ -176,12 +209,198 @@
   font-size: 16px;
 }
 
+/* Statistics Section */
+.stats-section h2 {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+}
+
+.stat-number {
+  font-size: 36px;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* System Information */
+.system-section h2 {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.system-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.system-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-radius: 6px;
+}
+
+.system-info-item label {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.system-info-item .value {
+  font-size: 15px;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+/* Skills Section */
+.skills-section h2 {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.skills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skill-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.skill-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.skill-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.skill-description {
+  font-size: 13px;
+  color: #6b7280;
+  max-width: 80%;
+}
+
+.no-skills {
+  text-align: center;
+  padding: 30px;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+/* Recent Logs */
+.logs-section h2 {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.logs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.log-item {
+  display: grid;
+  grid-template-columns: 150px 80px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.log-time {
+  color: #6b7280;
+  font-family: monospace;
+}
+
+.log-level {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-debug {
+  background: #e5e7eb;
+  color: #4b5563;
+}
+
+.badge-info {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-warn {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.log-message {
+  color: #1f2937;
+  word-break: break-word;
+}
+
+.no-logs {
+  text-align: center;
+  padding: 30px;
+  color: #6b7280;
+  font-size: 16px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .dashboard {
-    padding: 12px;
-  }
-  
   .charts-grid {
     grid-template-columns: 1fr;
   }
@@ -191,6 +410,27 @@
   }
   
   .channels-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-title {
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+  
+  .card {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .charts-grid {
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .charts-grid {
     grid-template-columns: 1fr;
   }
 }

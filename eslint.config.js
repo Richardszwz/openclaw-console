@@ -8,6 +8,7 @@ module.exports = [
   ...ts.configs.recommended,
   prettierConfig,
   {
+    files: ['src/frontend/src/**/*.{ts,tsx}'],
     languageOptions: {
       parserOptions: {
         project: './tsconfig.json',
@@ -18,6 +19,14 @@ module.exports = [
     },
     rules: {
       'react/react-in-jsx-scope': 'off',
+    },
+  },
+  {
+    files: ['src/server/**/*.{ts,js}'],
+    languageOptions: {
+      parserOptions: {
+        project: './tsconfig.server.json',
+      },
     },
   },
   {

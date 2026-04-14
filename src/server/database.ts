@@ -3,6 +3,7 @@
  * Uses better-sqlite3 for efficient synchronous database access
  */
 import Database from 'better-sqlite3';
+import type { Database as DatabaseType } from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 
@@ -17,7 +18,8 @@ if (!fs.existsSync(dataDir)) {
 
 const dbPath = process.env.DB_PATH || path.join(dataDir, 'openclaw.db');
 
-const db = new Database(dbPath);
+const db: DatabaseType = new Database(dbPath);
+
 
 /**
  * Initialize database schema - creates all tables if they don't exist
@@ -138,14 +140,114 @@ export function initDatabase(): void {
       status TEXT NOT NULL DEFAULT 'completed'
     );
   `);
-}
 
-// Create indexes for better performance
-db.exec(`
-  CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token);
-  CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
-  CREATE INDEX IF NOT EXISTS idx_logs_created ON logs(created_at);
-`);
+  // Alert rules table for configuring alert conditions
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS alert_rules (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      type TEXT NOT NULL,
+      enabled BOOLEAN DEFAULT 1,
+      threshold INTEGER,
+      duration_threshold INTEGER,
+      description TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  // Alert history table for tracking triggered alerts
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS alert_history (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      rule_id INTEGER,
+      message TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'active',
+      source TEXT,
+      triggered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      resolved_at DATETIME,
+      acknowledged_at DATETIME,
+      acknowledged_by INTEGER,
+      FOREIGN KEY (rule_id) REFERENCES alert_rules(id),
+      FOREIGN KEY (acknowledged_by) REFERENCES users(id)
+    );
+  `);
+
+  // Alert silences table for muting alerts during maintenance
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS alert_silences (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      filter TEXT,
+      starts_at DATETIME NOT NULL,
+      ends_at DATETIME NOT NULL,
+      created_by INTEGER NOT NULL,
+      enabled BOOLEAN DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (created_by) REFERENCES users(id)
+    );
+  `);
+
+  // Notification settings for alert channels
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS notification_settings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      type TEXT NOT NULL DEFAULT 'feishu',
+      webhook_url TEXT NOT NULL,
+      enabled BOOLEAN DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  // Daily model usage tracking for charts
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS model_daily_usage (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      model_id TEXT NOT NULL,
+      prompt_tokens INTEGER DEFAULT 0,
+      completion_tokens INTEGER DEFAULT 0,
+      total_tokens INTEGER DEFAULT 0,
+      estimated_cost REAL DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(date, model_id)
+    );
+  `);
+
+  // Model quota alert history
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS model_quota_alerts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      model_id TEXT NOT NULL,
+      model_name TEXT NOT NULL,
+      alert_type TEXT NOT NULL CHECK(alert_type IN ('warning', 'critical')),
+      current_usage INTEGER NOT NULL,
+      quota INTEGER NOT NULL,
+      percentage REAL NOT NULL,
+      message TEXT NOT NULL,
+      sent_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      notified BOOLEAN DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  // Create indexes for better performance
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token);
+    CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
+    CREATE INDEX IF NOT EXISTS idx_logs_created ON logs(created_at);
+    CREATE INDEX IF NOT EXISTS idx_alert_rules_type ON alert_rules(type);
+    CREATE INDEX IF NOT EXISTS idx_alert_rules_enabled ON alert_rules(enabled);
+    CREATE INDEX IF NOT EXISTS idx_alert_history_status ON alert_history(status);
+    CREATE INDEX IF NOT EXISTS idx_alert_history_triggered ON alert_history(triggered_at);
+    CREATE INDEX IF NOT EXISTS idx_alert_silences_enabled ON alert_silences(enabled);
+    CREATE INDEX IF NOT EXISTS idx_model_daily_usage_date ON model_daily_usage(date);
+    CREATE INDEX IF NOT EXISTS idx_model_daily_usage_model ON model_daily_usage(model_id);
+    CREATE INDEX IF NOT EXISTS idx_model_quota_alerts_model ON model_quota_alerts(model_id);
+    CREATE INDEX IF NOT EXISTS idx_model_quota_alerts_sent ON model_quota_alerts(sent_at);
+  `);
+}
 
 export { db };
 export default db;

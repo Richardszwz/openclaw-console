@@ -1,0 +1,304 @@
+/**
+ * Agents page styles - Agent list view
+ */
+
+.agents-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.agents-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.agents-title {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0;
+  color: #1f2937;
+}
+
+.agents-filters {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  border-color: #d1d5db;
+  color: #1f2937;
+}
+
+.filter-btn.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.refresh-info {
+  font-size: 14px;
+  color: #6b7280;
+  margin-left: 12px;
+}
+
+.agents-loading,
+.agents-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  font-size: 18px;
+  color: #6b7280;
+}
+
+.agents-error {
+  color: #ef4444;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.retry-btn {
+  padding: 8px 20px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.retry-btn:hover {
+  background: #2563eb;
+}
+
+.agents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.agent-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  padding: 20px;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.agent-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+}
+
+.agent-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.agent-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.agent-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.status-dot.active {
+  background: #10b981;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+}
+
+.status-dot.idle {
+  background: #f59e0b;
+}
+
+.status-dot.unknown {
+  background: #6b7280;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.agent-status-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.agent-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.agent-info-item label {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.agent-info-item .value {
+  font-size: 15px;
+  color: #1f2937;
+  word-break: break-all;
+}
+
+.agent-info-item .value.model {
+  font-family: 'Monaco', 'Menlo', monospace;
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.agent-info-item .value.path {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 13px;
+  word-break: break-all;
+  color: #4b5563;
+}
+
+.agent-skills {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.agent-skills label {
+  display: block;
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.skill-tag {
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.no-agents {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+  font-size: 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .agents-page {
+    padding: 12px;
+  }
+
+  .agents-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .agents-filters {
+    flex-wrap: wrap;
+  }
+
+  .agents-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .agents-title {
+    font-size: 24px;
+  }
+}
+
+/* Large screen optimizations */
+@media (min-width: 1921px) and (max-width: 2560px) {
+  .agents-page {
+    max-width: 1800px;
+  }
+
+  .agents-title {
+    font-size: 32px;
+  }
+
+  .agents-grid {
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 24px;
+  }
+
+  .agent-card {
+    padding: 24px;
+  }
+}
+
+@media (min-width: 2561px) {
+  .agents-page {
+    max-width: 2200px;
+  }
+
+  .agents-title {
+    font-size: 36px;
+  }
+
+  .agents-grid {
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 28px;
+  }
+
+  .agent-card {
+    padding: 28px;
+  }
+}
